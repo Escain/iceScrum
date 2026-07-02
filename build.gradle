@@ -41,6 +41,8 @@ dependencies {
     implementation project(':icescrum-core')
     developmentOnly "org.springframework.boot:spring-boot-devtools"
     implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    // Groovy 4 moved Date GDK extensions (clearTime etc.) to a separate module
+    implementation "org.apache.groovy:groovy-dateutil"
     implementation "org.apache.grails:grails-cache"
     implementation "org.apache.grails:grails-core"
     implementation "org.apache.grails:grails-data-hibernate5"
@@ -97,6 +99,16 @@ dependencies {
 }
 
 compileJava.options.release = 17
+
+// Method security expressions (@PreAuthorize('owner(#team)')) resolve argument
+// names reflectively; Groovy/Java must be compiled with parameter names
+tasks.withType(org.gradle.api.tasks.compile.GroovyCompile).configureEach {
+    groovyOptions.parameters = true
+}
+tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
+    options.compilerArgs << '-parameters'
+}
+
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()

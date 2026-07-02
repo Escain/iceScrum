@@ -21,6 +21,8 @@
     </appender>
 
     <logger name="org.hibernate" level="ERROR"/>
+    <!-- Keep JDBC error details visible (suppressed by org.hibernate=ERROR otherwise) -->
+    <logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="WARN"/>
     <!-- Surface schema generation failures, which are logged at WARN and would be hidden by the ERROR level above -->
     <logger name="org.hibernate.tool.schema" level="WARN"/>
     <logger name="org.springframework" level="ERROR"/>
