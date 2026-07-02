@@ -1,6 +1,0 @@
-# SOURCE_DATE_EPOCH = 1782950400
-
-info.app.version=7.55
-info.app.name=icescrum
-grails.env=production
-info.app.grailsVersion=7.1.2
