@@ -78,12 +78,18 @@ dependencies {
 
     console "org.apache.grails:grails-console"
     runtimeOnly "cloud.wondrify:asset-pipeline-grails:5.0.34"
+    // sass compilation at runtime in dev mode (gradle-time uses the assets block's 'from')
+    runtimeOnly "cloud.wondrify:sass-asset-pipeline:5.0.34"
     runtimeOnly "com.h2database:h2"
     runtimeOnly "com.zaxxer:HikariCP"
     runtimeOnly "org.fusesource.jansi:jansi"
     runtimeOnly "org.postgresql:postgresql"
     runtimeOnly "com.mysql:mysql-connector-j"
     compileOnly "com.mysql:mysql-connector-j" // CommunicationsException referenced in UrlMappings exception mapping (Grails 7 migration)
+
+    // Compile-time asset processing modules (the asset-pipeline gradle plugin
+    // resolves these in its own 'assets' configuration for the forked compiler)
+    assets "cloud.wondrify:sass-asset-pipeline:5.0.34"
 
     testImplementation "org.apache.grails:grails-testing-support-datamapping"
     testImplementation "org.apache.grails:grails-testing-support-web"
@@ -97,12 +103,11 @@ tasks.withType(Test).configureEach {
 }
 
 assets {
-    minifyJs = true
+    // Google Closure (asset-pipeline 5's JS minifier) fails hard on the bundled
+    // lottie build (block-scoped redeclaration); ship JS unminified like most
+    // vendored files already are
+    minifyJs = false
     minifyCss = true
-    configOptions = [
-            sass: [useNative: false]
-    ]
-    from "cloud.wondrify:sass-asset-pipeline:5.0.34"
 }
 
 bootRun {
