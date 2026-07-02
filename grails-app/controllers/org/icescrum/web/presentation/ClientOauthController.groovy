@@ -1,5 +1,6 @@
 package org.icescrum.web.presentation
 
+import grails.core.GrailsApplication
 import grails.converters.JSON
 import org.icescrum.core.error.ControllerErrorHandler
 import org.icescrum.core.security.WorkspaceSecurity
@@ -10,7 +11,7 @@ import org.springframework.security.access.annotation.Secured
 class ClientOauthController implements ControllerErrorHandler, WorkspaceSecurity {
 
     def springSecurityService
-    def grailsApplication
+    GrailsApplication grailsApplication
     def metaDataService
 
     def save(long workspace, String workspaceType, String providerId) {

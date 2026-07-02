@@ -24,6 +24,7 @@
 
 package org.icescrum.web.presentation.windows
 
+import grails.core.GrailsApplication
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.icescrum.core.domain.Backlog
@@ -37,7 +38,7 @@ import java.text.DecimalFormat
 class BacklogController implements ControllerErrorHandler {
 
     def springSecurityService
-    def grailsApplication
+    GrailsApplication grailsApplication
 
     @Secured(['stakeHolder() or inProject()'])
     def index(long project) {

@@ -24,6 +24,8 @@
 
 package org.icescrum.web.presentation
 
+import grails.core.GrailsApplication
+import groovy.xml.XmlSlurper
 import eu.bitwalker.useragentutils.Browser
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -41,17 +43,16 @@ import org.icescrum.core.ui.WindowDefinition
 import org.icescrum.core.utils.ServicesUtils
 import org.icescrum.web.OpenAPIUrlMappingsRenderer
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
-import sun.misc.BASE64Decoder
 
 class ScrumOSController implements ControllerErrorHandler {
 
     def userService
     def messageSource
-    def servletContext
+    jakarta.servlet.ServletContext servletContext
     def projectService
     def portfolioService
     def securityService
-    def grailsApplication
+    GrailsApplication grailsApplication
     def uiDefinitionService
     def springSecurityService
     def atmosphereMeteor
@@ -199,7 +200,7 @@ class ScrumOSController implements ControllerErrorHandler {
                 response.setHeader(k, v)
             }
         }
-        response.outputStream << new BASE64Decoder().decodeBuffer(image)
+        response.outputStream << Base64.mimeDecoder.decode(image)
     }
 
     def version(boolean verbose, boolean refresh) {

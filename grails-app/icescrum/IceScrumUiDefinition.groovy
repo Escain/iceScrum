@@ -1,3 +1,4 @@
+import groovy.xml.XmlSlurper
 import org.icescrum.core.domain.WorkspaceType
 import org.icescrum.core.utils.ServicesUtils
 

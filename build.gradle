@@ -1,0 +1,106 @@
+/*
+ * iceScrum — Apache Grails 7 build (migrated from Grails 2.5.6 BuildConfig.groovy)
+ */
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url = 'https://repo.grails.org/grails/restricted'
+        }
+    }
+    dependencies { // Not published to Gradle Plugin Portal
+        classpath "cloud.wondrify:asset-pipeline-gradle:5.0.34"
+        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
+        classpath "org.apache.grails:grails-data-hibernate5"
+        classpath "org.apache.grails:grails-data-hibernate5-dbmigration"
+        classpath "org.apache.grails:grails-gradle-plugins"
+    }
+}
+
+plugins {
+    id "war"
+    id "idea"
+    id "eclipse"
+}
+
+apply plugin: "org.apache.grails.gradle.grails-web"
+apply plugin: "org.apache.grails.gradle.grails-gsp"
+apply plugin: "cloud.wondrify.asset-pipeline"
+
+group = "org.icescrum"
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://repo.grails.org/grails/restricted'
+    }
+}
+
+dependencies {
+    profile "org.apache.grails.profiles:web"
+    implementation project(':icescrum-core')
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    implementation "org.apache.grails:grails-cache"
+    implementation "org.apache.grails:grails-core"
+    implementation "org.apache.grails:grails-data-hibernate5"
+    implementation "org.apache.grails:grails-data-hibernate5-dbmigration"
+    implementation "org.apache.grails:grails-databinding"
+    implementation "org.apache.grails:grails-events"
+    implementation "org.apache.grails:grails-gsp"
+    implementation "org.apache.grails:grails-interceptors"
+    implementation "org.apache.grails:grails-layout"
+    implementation "org.apache.grails:grails-logging"
+    implementation "org.apache.grails:grails-rest-transforms"
+    implementation "org.apache.grails:grails-scaffolding"
+    implementation "org.apache.grails:grails-services"
+    implementation "org.apache.grails:grails-url-mappings"
+    implementation "org.apache.grails:grails-web-boot"
+    // cache-ehcache 3.0.0 is not resolvable from Maven Central; the default
+    // grails-cache cache manager is used instead (ehcache tuning TBD)
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-logging"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+
+    // Reports need itext (was excluded/bundled selectively in Grails 2 build)
+    implementation("com.lowagie:itext:2.1.7") {
+        exclude group: "bouncycastle"
+        exclude group: "org.bouncycastle"
+    }
+    // Browser detection (was browser-detection Grails 2 plugin)
+    implementation "eu.bitwalker:UserAgentUtils:1.21"
+    // Was lib/xzing-core.jar and lib/xzing-javase.jar
+    implementation "com.google.zxing:core:3.5.3"
+    implementation "com.google.zxing:javase:3.5.3"
+
+    console "org.apache.grails:grails-console"
+    runtimeOnly "cloud.wondrify:asset-pipeline-grails:5.0.34"
+    runtimeOnly "com.h2database:h2"
+    runtimeOnly "com.zaxxer:HikariCP"
+    runtimeOnly "org.fusesource.jansi:jansi"
+    runtimeOnly "org.postgresql:postgresql"
+    runtimeOnly "com.mysql:mysql-connector-j"
+    compileOnly "com.mysql:mysql-connector-j" // CommunicationsException referenced in UrlMappings exception mapping (Grails 7 migration)
+
+    testImplementation "org.apache.grails:grails-testing-support-datamapping"
+    testImplementation "org.apache.grails:grails-testing-support-web"
+    testImplementation "org.spockframework:spock-core"
+}
+
+compileJava.options.release = 17
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+assets {
+    minifyJs = true
+    minifyCss = true
+    configOptions = [
+            sass: [useNative: false]
+    ]
+    from "cloud.wondrify:sass-asset-pipeline:5.0.34"
+}

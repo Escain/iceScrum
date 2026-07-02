@@ -30,7 +30,7 @@ import org.icescrum.core.error.ControllerErrorHandler
 import org.icescrum.core.security.WorkspaceSecurity
 import org.icescrum.plugins.attachmentable.domain.Attachment
 
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletResponse
 
 @Secured('permitAll()')
 class AttachmentController implements ControllerErrorHandler, WorkspaceSecurity {

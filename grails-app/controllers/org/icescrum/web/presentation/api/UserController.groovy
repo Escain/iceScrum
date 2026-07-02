@@ -23,6 +23,7 @@
  */
 package org.icescrum.web.presentation.api
 
+import grails.core.GrailsApplication
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.apache.commons.io.FilenameUtils
@@ -43,7 +44,7 @@ class UserController implements ControllerErrorHandler {
 
     def userService
     def securityService
-    def grailsApplication
+    GrailsApplication grailsApplication
     def springSecurityService
 
     @Secured(["hasRole('ROLE_ADMIN')"])

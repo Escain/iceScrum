@@ -24,6 +24,7 @@
  */
 package org.icescrum.web.presentation.widgets
 
+import groovy.xml.XmlSlurper
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.icescrum.core.domain.User
