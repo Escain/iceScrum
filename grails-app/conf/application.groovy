@@ -613,6 +613,11 @@ grails {
             successHandler.targetUrlParameter = 'redirectTo'
             logout.targetUrlParameter = 'redirectTo'
             useBasicAuth = true
+            // Spring Security 6 renamed the form-login endpoint and parameters;
+            // keep the legacy names used by the login GSP
+            apf.filterProcessesUrl = '/j_spring_security_check'
+            apf.usernameParameter = 'j_username'
+            apf.passwordParameter = 'j_password'
             basic.realmName = "Basic authentication for iceScrum"
             // Grails 7 plugin requires a List of Maps (same patterns/filters/order as the old Map form)
             filterChain.chainMap = [

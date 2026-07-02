@@ -39,6 +39,8 @@ beans = {
         primaryBeanNames = ['grailsCacheManager']
     }
 
+    layoutViewResolverInitializer(org.icescrum.web.support.LayoutViewResolverInitializer)
+
     webExpressionHandler(WebScrumExpressionHandler) {
         roleHierarchy = ref('roleHierarchy')
     }
@@ -52,6 +54,8 @@ beans = {
 
     messageSource(IceScrumMessageSource) {
         basenames = "classpath:messages"
+        // wired automatically for the default messageSource, not for a custom bean
+        pluginManager = ref('pluginManager')
     }
 
     timeoutHttpSessionListener(TimeoutHttpSessionListener) {
