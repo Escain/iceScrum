@@ -40,7 +40,8 @@ class BootStrap {
             grailsApplication.config.icescrum.setupCompleted = true
         }
 
-        servletContext.addListener(timeoutHttpSessionListener)
+        // Grails 7: timeoutHttpSessionListener is a bean implementing HttpSessionListener,
+        // Spring Boot registers it in the embedded container automatically
         localeResolver.defaultLocale = Locale.ENGLISH
         java.util.Locale.setDefault(Locale.ENGLISH)
         TimeZone.setDefault(TimeZone.getTimeZone(grailsApplication.config.icescrum.timezone.default))

@@ -32,6 +32,13 @@ import org.icescrum.i18n.IceScrumMessageSource
 //   database-migration plugin resolves grails-app/migrations itself now
 beans = {
 
+    // Was registered by the Grails 2 spring-security-core plugin
+    parameterNameDiscoverer(org.springframework.core.DefaultParameterNameDiscoverer)
+
+    primaryBeanConfigurer(org.icescrum.web.support.PrimaryBeanConfigurer) {
+        primaryBeanNames = ['grailsCacheManager']
+    }
+
     webExpressionHandler(WebScrumExpressionHandler) {
         roleHierarchy = ref('roleHierarchy')
     }

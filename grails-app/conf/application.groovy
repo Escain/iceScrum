@@ -591,18 +591,19 @@ grails {
 
             rejectIfNoRule = false
             fii.rejectPublicInvocations = true
+            // Grails 7 / spring-security-core 4+: staticRules must be a List of Maps (same rules and order as the old Map form)
             controllerAnnotations.staticRules = [
                     //app controllers rules
-                    '/grails-errorhandler'     : ['permitAll'],
-                    '/stream/app/**'           : ['permitAll'],
-                    '/scrumOS/**'              : ['permitAll'],
-                    '/user/**'                 : ['permitAll'],
-                    '/errors/**'               : ['permitAll'],
-                    '/assets/**'               : ['permitAll'],
-                    '/**/js/**'                : ['permitAll'],
-                    '/**/css/**'               : ['permitAll'],
-                    '/**/images/**'            : ['permitAll'],
-                    '/**/favicon.ico'          : ['permitAll'],
+                    [pattern: '/grails-errorhandler', access: ['permitAll']],
+                    [pattern: '/stream/app/**', access: ['permitAll']],
+                    [pattern: '/scrumOS/**', access: ['permitAll']],
+                    [pattern: '/user/**', access: ['permitAll']],
+                    [pattern: '/errors/**', access: ['permitAll']],
+                    [pattern: '/assets/**', access: ['permitAll']],
+                    [pattern: '/**/js/**', access: ['permitAll']],
+                    [pattern: '/**/css/**', access: ['permitAll']],
+                    [pattern: '/**/images/**', access: ['permitAll']],
+                    [pattern: '/**/favicon.ico', access: ['permitAll']],
             ]
 
             userLookup.userDomainClassName = 'org.icescrum.core.domain.User'
@@ -613,10 +614,11 @@ grails {
             logout.targetUrlParameter = 'redirectTo'
             useBasicAuth = true
             basic.realmName = "Basic authentication for iceScrum"
+            // Grails 7 plugin requires a List of Maps (same patterns/filters/order as the old Map form)
             filterChain.chainMap = [
-                    '/ws/**'          : 'JOINED_FILTERS,-exceptionTranslationFilter,-authenticationProcessingFilter,-securityContextPersistenceFilter,-securityContextHolderAwareRequestFilter,-anonymousAuthenticationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter', // Only token auth & oauth
-                    '/**/project/feed': 'JOINED_FILTERS,-exceptionTranslationFilter,-tokenAuthenticationFilter,-restExceptionTranslationFilter', // Session & basic auth
-                    '/**'             : 'JOINED_FILTERS,-tokenAuthenticationFilter,-restExceptionTranslationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter'// Only form auth with session
+                    [pattern: '/ws/**', filters: 'JOINED_FILTERS,-exceptionTranslationFilter,-authenticationProcessingFilter,-securityContextPersistenceFilter,-securityContextHolderAwareRequestFilter,-anonymousAuthenticationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter'], // Only token auth
+                    [pattern: '/**/project/feed', filters: 'JOINED_FILTERS,-exceptionTranslationFilter,-tokenAuthenticationFilter,-restExceptionTranslationFilter'], // Session & basic auth
+                    [pattern: '/**', filters: 'JOINED_FILTERS,-tokenAuthenticationFilter,-restExceptionTranslationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter'] // Only form auth with session
             ]
 
             rememberMe {
@@ -711,7 +713,7 @@ environments {
         grails.mail.overrideAddress = "testing@kagilum.com"
         grails.plugins.hibernateMetrics.enabled = true
         grails.plugins.hibernateMetrics.logSqlToConsole = false
-        grails.plugin.springsecurity.controllerAnnotations.staticRules['/hibernateMetrics/**'] = ['permitAll']
+        grails.plugin.springsecurity.controllerAnnotations.staticRules << [pattern: '/hibernateMetrics/**', access: ['permitAll']] // List-of-Maps format (spring-security-core 4+)
     }
 }
 

@@ -104,3 +104,7 @@ assets {
     ]
     from "cloud.wondrify:sass-asset-pipeline:5.0.34"
 }
+
+bootRun {
+    jvmArgs('-Xmx1200m')
+}
