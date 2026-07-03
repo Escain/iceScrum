@@ -55,6 +55,15 @@ class LoginController implements ControllerErrorHandler {
     // Show the login page
     def auth(String username, String redirectTo) {
         def config = SpringSecurityUtils.securityConfig
+        // A session can survive a server restart (devtools persists them) while its
+        // user is gone from the database, which caused an infinite redirect loop
+        // between / and /login/auth. Treat such sessions as logged out.
+        if (springSecurityService.isLoggedIn() && !springSecurityService.currentUser) {
+            SCH.clearContext()
+            session.invalidate()
+            redirect(action: 'auth') // fresh request with a fresh session
+            return
+        }
         if (springSecurityService.isLoggedIn()) {
             redirectTo = redirectTo ?: (session["redirectTo"] ?: null)
             if (redirectTo && !redirectTo.startsWith(ApplicationSupport.serverURL())) {
