@@ -422,7 +422,15 @@ grails.mime.types = [
 ]
 
 // The default codec used to encode data with ${}
-grails.views.default.codec = "none" // none, html, base64
+grails.views.default.codec = "none" // none, html, base64 (legacy key, ignored by Grails 7)
+// Grails 7 replaced the key above with per-part codecs and defaults expressions
+// to HTML-encoding. iceScrum templates (e.g. is:widget passing body() through a
+// model expression) rely on the original unencoded behavior and do their own
+// escaping where needed.
+grails.views.gsp.codecs.expression = 'none'
+grails.views.gsp.codecs.scriptlet = 'none'
+grails.views.gsp.codecs.taglib = 'none'
+grails.views.gsp.codecs.staticparts = 'none'
 grails.views.gsp.encoding = "UTF-8"
 grails.converters.encoding = "UTF-8"
 
