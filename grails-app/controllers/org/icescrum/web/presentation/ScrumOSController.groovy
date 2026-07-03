@@ -24,6 +24,7 @@
 
 package org.icescrum.web.presentation
 
+import org.icescrum.web.support.CacheHeadersSupport
 import grails.core.GrailsApplication
 import groovy.xml.XmlSlurper
 import eu.bitwalker.useragentutils.Browser
@@ -44,7 +45,7 @@ import org.icescrum.core.utils.ServicesUtils
 import org.icescrum.web.OpenAPIUrlMappingsRenderer
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
-class ScrumOSController implements ControllerErrorHandler {
+class ScrumOSController implements ControllerErrorHandler, CacheHeadersSupport {
 
     def userService
     def messageSource

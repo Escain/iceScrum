@@ -23,6 +23,7 @@
  */
 package org.icescrum.web.presentation.api
 
+import org.icescrum.web.support.CacheHeadersSupport
 import grails.core.GrailsApplication
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -40,7 +41,7 @@ import org.icescrum.core.error.ControllerErrorHandler
 import org.icescrum.core.support.ApplicationSupport
 import org.springframework.security.acls.domain.BasePermission
 
-class UserController implements ControllerErrorHandler {
+class UserController implements ControllerErrorHandler, CacheHeadersSupport {
 
     def userService
     def securityService
