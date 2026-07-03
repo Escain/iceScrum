@@ -28,8 +28,8 @@
         lang: '${user ? user.preferences.language : lang}',
         user: ${user ? user as JSON : 'null'}, <%-- Grails 7: null as JSON renders empty, not 'null' --%>
         userPreferences: ${user ? user.preferences as JSON : 'null'},
-        menus: ${menus as JSON},
-        roles: ${roles as JSON},
+        menus: ${menus != null ? menus as JSON : 'null'},
+        roles: ${roles != null ? roles as JSON : 'null'},
         defaultView: "${defaultView}",
         workspace: ${workspace ? workspace as JSON : 'null'},
         serverID: '${Holders.grailsApplication.config.icescrum.appID}',
@@ -45,9 +45,9 @@
         projectCreationEnabled: ${ApplicationSupport.booleanValue(grailsApplication.config.icescrum.project.creation.enable)},
         registrationEnabled: ${ApplicationSupport.booleanValue(grailsApplication.config.icescrum.registration.enable)},
         retrieveEnabled: ${ApplicationSupport.booleanValue(grailsApplication.config.icescrum.login.retrieve.enable)},
-        messages: ${i18nMessages as JSON},
-        bundles: ${is.i18nBundle() as JSON},
-        projectMenus: ${projectMenus as JSON},
+        messages: ${i18nMessages != null ? i18nMessages as JSON : 'null'},
+        bundles: ${is.i18nBundle() != null ? is.i18nBundle() as JSON : 'null'},
+        projectMenus: ${projectMenus != null ? projectMenus as JSON : 'null'},
         types: {
             task:${resourceBundles.taskTypes.keySet() as JSON},
             story:${resourceBundles.storyTypes.keySet() as JSON},
