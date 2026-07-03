@@ -26,7 +26,7 @@
         darkMode: '${asset.assetPath(src:"application-dark.css")}',
         lightMode: '${asset.assetPath(src:"application.css")}',
         lang: '${user ? user.preferences.language : lang}',
-        user: ${user as JSON},
+        user: ${user ? user as JSON : 'null'}, <%-- Grails 7: null as JSON renders empty, not 'null' --%>
         userPreferences: ${user ? user.preferences as JSON : 'null'},
         menus: ${menus as JSON},
         roles: ${roles as JSON},
