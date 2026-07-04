@@ -103,7 +103,7 @@ class ScrumOSController implements ControllerErrorHandler, CacheHeadersSupport {
                                                              versionNumber : g.meta([name: 'app.version']),
                                                              maxMemory     : ApplicationSupport.getJavaMaxMemory(),
                                                              serverUrl     : ApplicationSupport.serverURL(),
-                                                             about         : new XmlSlurper().parse(aboutFile),
+                                                             about         : org.icescrum.core.utils.ServicesUtils.secureXmlSlurper().parse(aboutFile),
                                                              configLocation: grailsApplication.config.grails.config.locations instanceof List ? grailsApplication.config.grails.config.locations.join(', ') : ''])
     }
 

@@ -62,7 +62,7 @@
                                        name="j_username"
                                        required="required"
                                        id="username"
-                                       value="${params.username ?: ''}">
+                                       value="${(params.username ?: '').encodeAsHTML()}">
                             </div>
                         </div>
                         <div class="row">
