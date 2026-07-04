@@ -151,8 +151,8 @@ class UserController implements ControllerErrorHandler, CacheHeadersSupport {
             return
         }
         User.withTransaction {
-            if (request.admin && params.user.username != user.username) {
-                user.username = params.user.username
+            if (request.admin && params.user.username != null && params.user.username != user.username) {
+                user.username = params.user.username // don't null the username when the payload omits it (would break User.hashCode)
             }
             def propertiesToBind = ['firstName', 'lastName', 'email', 'notes']
             if (request.admin) {
@@ -417,8 +417,11 @@ class UserController implements ControllerErrorHandler, CacheHeadersSupport {
                     notRead : activity.dateCreated > user.preferences.lastReadActivities
             ]
         }
-        user.preferences.lastReadActivities = new Date()
-        user.preferences.save(flush: true)
+        // Grails 7 removed implicit service transactions; the controller must supply one for this write.
+        User.withTransaction {
+            user.preferences.lastReadActivities = new Date()
+            user.preferences.save(flush: true)
+        }
         render(status: 200, text: activitiesAndStories as JSON, contentType: 'application/json')
     }
 

@@ -53,12 +53,27 @@ class IceScrumInterceptor {
             ProfilingSupport.enableProfiling(ajax, controllerName, actionName)
         }
         // -- permissions --
-        def keysOk = securityService.decodeKeys(params)
-        if (!keysOk) {
-            forward(controller: 'errors', action: 'error404')
-            return false
-        }
-        if (controllerName != 'errors') { // Avoid filtering request if error to avoid nasty loop
+        // Grails 7: forward() re-invokes interceptors on the forwarded request. If decodeKeys fails and we
+        // forward to errors/error404, that forwarded request re-enters here, fails decodeKeys again (params
+        // still hold the bad key) and forwards again -> infinite recursion / StackOverflowError. So skip the
+        // whole permission block for the errors controller (the original code only guarded filterRequest).
+        if (controllerName != 'errors') {
+            def keysOk = securityService.decodeKeys(params)
+            if (!keysOk) {
+                // Render 404 directly instead of forwarding: decodeKeys has just nulled params.project, so a
+                // forward to errors/error404 reverse-maps through the project-scoped /p/(*) URL mapping (matched
+                // by the current /p/<key>/ request) and throws UrlMappingException because project is required.
+                // Rendering the view avoids reverse URL mapping entirely.
+                if (springSecurityService.isAjax(request)) {
+                    render(status: 404)
+                } else {
+                    render(status: 404, view: '/errors/404', model: [user        : springSecurityService.currentUser,
+                                                                      homeUrl     : ApplicationSupport.serverURL(),
+                                                                      supportEmail: grailsApplication.config.icescrum.alerts.errors.to,
+                                                                      originalUrl : request.forwardURI])
+                }
+                return false
+            }
             securityService.filterRequest()
         }
         // -- feature toggles --

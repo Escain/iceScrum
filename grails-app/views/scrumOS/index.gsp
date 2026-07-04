@@ -22,7 +22,11 @@
 <head>
     <meta name='layout' content='main'/>
     <g:if test="${project}">
-        <feed:meta kind="rss" version="2.0" controller="project" action="feed" params="[project: project.pkey.encodeAsHTML(), lang: lang]"/>
+        %{-- Grails 7 migration: the feeds plugin (feed:meta) was not ported. Emit the RSS autodiscovery <link> directly.
+             Must stay a void <link> element: an unclosed non-void tag here forces the parser out of <head> early and
+             wraps the whole body, collapsing the flex layout height chain. --}%
+        <link rel="alternate" type="application/rss+xml" title="${project.name.encodeAsHTML()}"
+              href="${createLink(controller: 'project', action: 'feed', params: [project: project.pkey.encodeAsHTML(), lang: lang])}"/>
         <title>${project.name.encodeAsHTML()}</title>
     </g:if>
     <g:elseif test="${portfolio}">
