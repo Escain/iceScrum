@@ -761,6 +761,7 @@ beans {
 /* DataSource (migrated from grails-app/conf/DataSource.groovy) */
 hibernate {
     jdbc.batch_size = 50
+    jdbc.lob.non_contextual_creation = true // PostgreSQL: avoid "PgConnection.createClob() not yet implemented" on text/lob columns
     order_inserts = true
     order_updates = true
     batch_versioned_data = true
@@ -773,21 +774,24 @@ hibernate {
 
 environments {
     development {
+        // Default: in-memory H2 (zero setup, wiped each run). To run dev against PostgreSQL for parity with
+        // production, set ICESCRUM_DB_URL (+ optional ICESCRUM_DB_USERNAME/PASSWORD/DBCREATE), e.g.:
+        //   ICESCRUM_DB_URL=jdbc:postgresql://localhost:5432/icescrum ./gradlew bootRun
         dataSource {
-            dbCreate = "create-drop"
-            username = "sa"
-            password = ""
-            driverClassName = "org.h2.Driver"
-            url = "jdbc:h2:mem:devDb"
+            if (System.getenv("ICESCRUM_DB_URL")) {
+                dbCreate = System.getenv("ICESCRUM_DB_DBCREATE") ?: "update"
+                driverClassName = "org.postgresql.Driver"
+                url = System.getenv("ICESCRUM_DB_URL")
+                username = System.getenv("ICESCRUM_DB_USERNAME") ?: "icescrum"
+                password = System.getenv("ICESCRUM_DB_PASSWORD") ?: "icescrum"
+            } else {
+                dbCreate = "create-drop"
+                username = "sa"
+                password = ""
+                driverClassName = "org.h2.Driver"
+                url = "jdbc:h2:mem:devDb"
+            }
         }
-//      -- PostgreSQL 17 (dev)
-//        dataSource {
-//            dbCreate = "update"
-//            username = "icescrum"
-//            password = "icescrum"
-//            driverClassName = "org.postgresql.Driver"
-//            url = "jdbc:postgresql://localhost:5432/icescrum"
-//        }
     }
     test {
         dataSource {
@@ -799,15 +803,19 @@ environments {
         }
     }
     production {
+        // PostgreSQL 17 by default. Override any field via env vars (ICESCRUM_DB_*) or an external config
+        // file (~/.icescrum/config.groovy, or the path in the ICESCRUM_CONFIG env var). GORM (dbCreate) builds
+        // the schema from the domain classes and the Liquibase changelogs (grails-app/migrations) patch it on
+        // start (grails.plugin.databasemigration.updateOnStart). The PostgreSQL JDBC driver is on the runtime
+        // classpath (build.gradle) and Hibernate 5.6 auto-selects the PostgreSQL dialect.
         dataSource {
             pooled = true
-            username = "sa"
-            password = ""
-            driverClassName = "org.h2.Driver"
-            url = "jdbc:h2:prodDb"
-            dbCreate = "update"
-            // Connection pool is HikariCP now (Spring Boot default); the old
-            // tomcat-jdbc pool properties were dropped.
+            dbCreate = System.getenv("ICESCRUM_DB_DBCREATE") ?: "update"
+            driverClassName = "org.postgresql.Driver"
+            url = System.getenv("ICESCRUM_DB_URL") ?: "jdbc:postgresql://localhost:5432/icescrum"
+            username = System.getenv("ICESCRUM_DB_USERNAME") ?: "icescrum"
+            password = System.getenv("ICESCRUM_DB_PASSWORD") ?: "icescrum"
+            // Connection pool is HikariCP (Spring Boot default); the old tomcat-jdbc pool properties were dropped.
         }
     }
 }
