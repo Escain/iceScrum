@@ -21,7 +21,7 @@
  */
 
 
-import com.mysql.jdbc.CommunicationsException
+import com.mysql.cj.jdbc.exceptions.CommunicationsException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.model.NotFoundException
 import org.springframework.security.authentication.BadCredentialsException

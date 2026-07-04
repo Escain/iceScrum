@@ -24,6 +24,7 @@
  */
 package org.icescrum.web.presentation.widgets
 
+import groovy.xml.XmlSlurper
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.icescrum.core.domain.User
@@ -73,7 +74,7 @@ class FeedController implements ControllerErrorHandler {
     private static getFeedContent(String url) {
         try {
             String feedText = ((URL) url.toURL()).getText(connectTimeout: TimeUnit.SECONDS.toMillis(3), readTimeout: TimeUnit.SECONDS.toMillis(10), 'UTF-8')
-            def channel = new XmlSlurper().parseText(feedText).channel
+            def channel = org.icescrum.core.utils.ServicesUtils.secureXmlSlurper().parseText(feedText).channel
             def contentFeed = [title: channel.title.text()]
             contentFeed.items = channel.item.collect { xmlItem ->
                 return [feed       : channel.title.text(),

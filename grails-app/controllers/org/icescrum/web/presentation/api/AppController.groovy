@@ -24,6 +24,7 @@
 
 package org.icescrum.web.presentation.api
 
+import grails.core.GrailsApplication
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.icescrum.core.app.AppDefinition
@@ -34,7 +35,7 @@ class AppController implements ControllerErrorHandler {
 
     def appService
     def appDefinitionService
-    def grailsApplication
+    GrailsApplication grailsApplication
 
     @Secured('permitAll()')
     def definitions() {

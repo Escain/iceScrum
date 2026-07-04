@@ -1,0 +1,5 @@
+rootProject.name = 'icescrum'
+
+// iceScrum-core is consumed as a source plugin from the sibling repository
+include 'icescrum-core'
+project(':icescrum-core').projectDir = new File(settingsDir, '../iceScrum-core')

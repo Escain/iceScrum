@@ -32,9 +32,11 @@ import org.icescrum.core.support.ApplicationSupport
 class HookController implements ControllerErrorHandler {
 
     def hookService
-    def beforeInterceptor = [action: this.&checkBeforeAction]
 
-    private checkBeforeAction() {
+    // Grails 7 removed controller `beforeInterceptor`, so this authorization was silently dead code (any
+    // authenticated user could register/read/modify webhooks on any project -> SSRF, event & secret exfiltration).
+    // It is now invoked explicitly at the start of every action.
+    private boolean checkAuthorized() {
         def workspace = ApplicationSupport.getCurrentWorkspace(params)
         if (workspace) {
             Boolean authorized
@@ -54,15 +56,18 @@ class HookController implements ControllerErrorHandler {
             render(status: 503)
             return false
         }
+        return true
     }
 
     def index() {
+        if (!checkAuthorized()) return
         def workspace = ApplicationSupport.getCurrentWorkspace(params)
         def hooks = Hook.findAllByWorkspaceIdAndWorkspaceType(workspace?.object?.id, workspace?.name)
         render(status: 200, contentType: 'application/json', text: hooks as JSON)
     }
 
     def save() {
+        if (!checkAuthorized()) return
         def workspace = ApplicationSupport.getCurrentWorkspace(params)
         Hook hook = new Hook()
         Hook.withTransaction {
@@ -76,6 +81,7 @@ class HookController implements ControllerErrorHandler {
     }
 
     def show(long id) {
+        if (!checkAuthorized()) return
         def workspace = ApplicationSupport.getCurrentWorkspace(params)
         def hook = Hook.findByIdAndWorkspaceIdAndWorkspaceType(id, workspace?.object?.id, workspace?.name)
         if (hook) {
@@ -86,6 +92,7 @@ class HookController implements ControllerErrorHandler {
     }
 
     def update(long id) {
+        if (!checkAuthorized()) return
         def workspace = ApplicationSupport.getCurrentWorkspace(params)
         def hook = Hook.findByIdAndWorkspaceIdAndWorkspaceType(id, workspace?.object?.id, workspace?.name)
         if (hook) {
@@ -98,6 +105,7 @@ class HookController implements ControllerErrorHandler {
     }
 
     def delete(long id) {
+        if (!checkAuthorized()) return
         def workspace = ApplicationSupport.getCurrentWorkspace(params)
         def hook = Hook.findByIdAndWorkspaceIdAndWorkspaceType(id, workspace?.object?.id, workspace?.name)
         if (hook) {

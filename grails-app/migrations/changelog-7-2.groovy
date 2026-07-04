@@ -25,17 +25,19 @@ import org.icescrum.core.domain.Story
 * Vincent BARRIER (vbarrier@kagilum.com)
 *
 */
+// Grails 7 database-migration no longer exposes a 'log' property inside grailsChange closures
+def log = org.slf4j.LoggerFactory.getLogger('liquibase')
 databaseChangeLog = {
     changeSet(author: "vbarrier", id: "add_default_timeboxNote_template") {
-        grailsChange {
-            preConditions(onFail: "MARK_RAN") {
-                not {
-                    or {
-                        dbms(type: 'postgresql')
-                        dbms(type: 'oracle')
-                    }
+        preConditions(onFail: "MARK_RAN") {
+            not {
+                or {
+                    dbms(type: 'postgresql')
+                    dbms(type: 'oracle')
                 }
             }
+        }
+        grailsChange {
             change {
                 def projects = Project.getAll()
                 def configsDataHtml = ([
@@ -85,10 +87,10 @@ databaseChangeLog = {
         }
     }
     changeSet(author: "vbarrier", id: "add_default_timeboxNote_template_postgres") {
+        preConditions(onFail: "MARK_RAN") {
+            dbms(type: 'postgresql')
+        }
         grailsChange {
-            preConditions(onFail: "MARK_RAN") {
-                dbms(type: 'postgresql')
-            }
             change {
                 def projects = Project.getAll()
                 def configsDataHtml = ([

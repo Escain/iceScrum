@@ -331,7 +331,7 @@ class TaskController implements ControllerErrorHandler {
                         state      : message(code: grailsApplication.config.icescrum.resourceBundles.taskStates[_task.state]),
                         description: _task.description,
                         notes      : ServicesUtils.textileToHtml(_task.notes),
-                        sprint     : g.message(code: 'is.sprint') + " " + ((Sprint) _task.backlog).index,
+                        sprint     : g.message(code: 'is.sprint') + " " + _task.sprintBacklog.index,
                         taskColor  : _task.color,
                         permalink  : _task.permalink,
                         story      : _task.parentStory ? _task.parentStory.name : null,

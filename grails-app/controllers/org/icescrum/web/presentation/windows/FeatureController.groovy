@@ -24,6 +24,7 @@
 
 package org.icescrum.web.presentation.windows
 
+import grails.core.GrailsApplication
 import grails.converters.JSON
 import grails.plugin.cache.Cacheable
 import grails.plugin.springsecurity.annotation.Secured
@@ -37,7 +38,7 @@ class FeatureController implements ControllerErrorHandler {
 
     def featureService
     def springSecurityService
-    def grailsApplication
+    GrailsApplication grailsApplication
 
     @Cacheable(value = 'featuresCache')
     def index(long project) {

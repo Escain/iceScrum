@@ -1,0 +1,14 @@
+# Grails 7 migration: replaces the Grails 2 application.properties metadata.
+# The app.* keys keep the legacy Metadata.current['app.*'] lookups working
+# (BootStrap banner, changelog-promote, ScrumOSController announcements).
+---
+app:
+    name: icescrum
+    version: '7.55'
+    displayReleaseNotes: 'true'
+    displayWhatsNew: 'true'
+info:
+    app:
+        name: icescrum
+        version: '7.55'
+        grailsVersion: '7.1.2'

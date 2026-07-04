@@ -26,11 +26,11 @@ package org.icescrum.web
 
 import grails.util.Holders
 import groovy.json.JsonOutput
-import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
-import org.codehaus.groovy.grails.validation.ConstrainedProperty
-import org.codehaus.groovy.grails.web.mapping.ResponseCodeUrlMapping
-import org.codehaus.groovy.grails.web.mapping.UrlMapping
-import org.codehaus.groovy.grails.web.mapping.reporting.UrlMappingsRenderer
+import org.grails.plugins.web.taglib.ApplicationTagLib
+import grails.gorm.validation.ConstrainedProperty
+import org.grails.web.mapping.ResponseCodeUrlMapping
+import grails.web.mapping.UrlMapping
+import grails.web.mapping.reporting.UrlMappingsRenderer
 import org.icescrum.core.domain.*
 import org.icescrum.core.support.ApplicationSupport
 
@@ -81,14 +81,14 @@ class OpenAPIUrlMappingsRenderer implements UrlMappingsRenderer {
                                 def actionMap = (Map) mapping.actionName
                                 methodNames = actionMap.keySet().collect { it.toLowerCase() }
                                 if (actionMap.containsKey('POST') && actionMap.containsKey('PUT') && actionMap['POST'] == actionMap['PUT']) {
-                                    methodNames.remove(POST)
+                                    methodNames.remove('post')
                                 }
                             } else {
                                 throwError(mapping, 'Mapping is not a Map ' + mapping.actionName.toString())
-                                methodNames = [customConfig.method ? customConfig.method.toLowerCase() : GET]
+                                methodNames = [customConfig.method ? customConfig.method.toLowerCase() : 'get']
                             }
                         } else {
-                            methodNames = [customConfig.method ? customConfig.method.toLowerCase() : GET]
+                            methodNames = [customConfig.method ? customConfig.method.toLowerCase() : 'get']
                         }
                         Map methods = methodNames.collectEntries { methodName ->
                             def actionName = mapping.actionName ? mapping.actionName[methodName.toUpperCase()] : actionNameFromParameter
@@ -167,7 +167,7 @@ class OpenAPIUrlMappingsRenderer implements UrlMappingsRenderer {
         def responses = [:]
         def requestBody
         def tagObject = components[tag] ? [$ref: "#/components/schemas/$tag"] : [type: 'object']
-        if (actionName == 'save' && methodName == POST) {
+        if (actionName == 'save' && methodName == 'post') {
             requestBody = [
                     content : ['application/json': [schema: [type: 'object', properties: [(tag): tagObject]]]],
                     required: true
@@ -177,22 +177,22 @@ class OpenAPIUrlMappingsRenderer implements UrlMappingsRenderer {
                     content    : ['application/json': [schema: tagObject]]
             ]
             description = "Create a new $tag"
-        } else if (actionName == 'update' && methodName == PUT) {
+        } else if (actionName == 'update' && methodName == 'put') {
             responses['200'] = [
                     description: 'OK - Sucessful update',
                     content    : ['application/json': [schema: tagObject]]
             ]
             description = "Update the $tag"
-        } else if (actionName == 'delete' && methodName == DELETE) {
+        } else if (actionName == 'delete' && methodName == 'delete') {
             responses['204'] = [$ref: '#/components/responses/204-DELETE']
             description = "Delete the $tag"
-        } else if (actionName in ['show', 'uid'] && methodName == GET) {
+        } else if (actionName in ['show', 'uid'] && methodName == 'get') {
             responses['200'] = [
                     description: 'OK - Sucessful get',
                     content    : ['application/json': [schema: tagObject]]
             ]
             description = "Get the $tag"
-        } else if (actionName == 'index' && methodName == GET) {
+        } else if (actionName == 'index' && methodName == 'get') {
             responses['200'] = [
                     description: 'OK - Sucessful list',
                     content    : ['application/json': [schema: [type: 'array', items: tagObject]]]
@@ -596,6 +596,6 @@ class OpenAPIUrlMappingsRenderer implements UrlMappingsRenderer {
     }
 
     private ApplicationTagLib getApplicationTagLib() {
-        Holders.grailsApplication.mainContext.getBean('org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib')
+        Holders.grailsApplication.mainContext.getBean('org.grails.plugins.web.taglib.ApplicationTagLib')
     }
 }

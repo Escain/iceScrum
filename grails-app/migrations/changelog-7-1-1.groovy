@@ -25,6 +25,8 @@ import org.icescrum.core.domain.*
 * Vincent BARRIER (vbarrier@kagilum.com)
 *
 */
+// Grails 7 database-migration no longer exposes a 'log' property inside grailsChange closures
+def log = LoggerFactory.getLogger('liquibase')
 databaseChangeLog = {
     changeSet(author: "vbarrier", id: "add_notnull_constraint_attachments_comments_count_is_sprint") {
         grailsChange {

@@ -23,6 +23,8 @@
  */
 package org.icescrum.web.presentation.api
 
+import org.icescrum.web.support.CacheHeadersSupport
+import grails.core.GrailsApplication
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.apache.commons.io.FilenameUtils
@@ -39,11 +41,11 @@ import org.icescrum.core.error.ControllerErrorHandler
 import org.icescrum.core.support.ApplicationSupport
 import org.springframework.security.acls.domain.BasePermission
 
-class UserController implements ControllerErrorHandler {
+class UserController implements ControllerErrorHandler, CacheHeadersSupport {
 
     def userService
     def securityService
-    def grailsApplication
+    GrailsApplication grailsApplication
     def springSecurityService
 
     @Secured(["hasRole('ROLE_ADMIN')"])
@@ -149,8 +151,8 @@ class UserController implements ControllerErrorHandler {
             return
         }
         User.withTransaction {
-            if (request.admin && params.user.username != user.username) {
-                user.username = params.user.username
+            if (request.admin && params.user.username != null && params.user.username != user.username) {
+                user.username = params.user.username // don't null the username when the payload omits it (would break User.hashCode)
             }
             def propertiesToBind = ['firstName', 'lastName', 'email', 'notes']
             if (request.admin) {
@@ -415,8 +417,11 @@ class UserController implements ControllerErrorHandler {
                     notRead : activity.dateCreated > user.preferences.lastReadActivities
             ]
         }
-        user.preferences.lastReadActivities = new Date()
-        user.preferences.save(flush: true)
+        // Grails 7 removed implicit service transactions; the controller must supply one for this write.
+        User.withTransaction {
+            user.preferences.lastReadActivities = new Date()
+            user.preferences.save(flush: true)
+        }
         render(status: 200, text: activitiesAndStories as JSON, contentType: 'application/json')
     }
 

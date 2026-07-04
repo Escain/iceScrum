@@ -1,3 +1,4 @@
+import groovy.xml.XmlSlurper
 import org.icescrum.core.domain.WorkspaceType
 import org.icescrum.core.utils.ServicesUtils
 
@@ -165,7 +166,7 @@ widgets = {
         onUpdate { widget, settings ->
             settings.feeds?.findAll { !it.title }?.each {
                 try {
-                    it.title = new XmlSlurper().parse(it.url).channel.title.text()
+                    it.title = org.icescrum.core.utils.ServicesUtils.secureXmlSlurper().parse(it.url).channel.title.text()
                 } catch (Exception e) {}
             }
             settings.feeds = settings.feeds?.findAll { it.title }.unique { it.url }

@@ -21,6 +21,7 @@
 
 package org.icescrum.web.presentation
 
+import grails.core.GrailsApplication
 import grails.converters.JSON
 import grails.util.Environment
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -30,7 +31,7 @@ import org.icescrum.core.support.ApplicationSupport
 
 class ErrorsController implements ControllerErrorHandler {
 
-    def grailsApplication
+    GrailsApplication grailsApplication
     def springSecurityService
     def notificationEmailService
     def helper = new org.springframework.web.util.UrlPathHelper()

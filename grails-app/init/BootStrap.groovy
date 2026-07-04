@@ -21,8 +21,11 @@
  */
 
 
+import grails.util.Environment
 import grails.util.Metadata
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import grails.core.GrailsApplication
+import org.icescrum.core.domain.User
+import org.icescrum.core.domain.preferences.UserPreferences
 import org.icescrum.core.support.ApplicationSupport
 
 class BootStrap {
@@ -30,9 +33,20 @@ class BootStrap {
     def localeResolver
     def authorityService
     def timeoutHttpSessionListener
-    DefaultGrailsApplication grailsApplication
+    GrailsApplication grailsApplication
+
+    def userService
 
     def init = { servletContext ->
+
+        // Dev-only dummy users (moved here from iceScrum-core's Grails 2 CoreBootStrap)
+        User.withTransaction {
+            if (Environment.current == Environment.DEVELOPMENT && !System.properties['icescrum.noDummyze'] && User.count() <= 1) {
+                println "Creating dummy users"
+                userService.save(new User(username: "a", email: "a@gmail.com", firstName: "Roberto", lastName: 'Doe', password: "a", preferences: new UserPreferences(language: 'en', activity: 'Consultant')))
+                userService.save(new User(username: "z", email: "z@gmail.com", firstName: "Bernardo", lastName: 'Doe', password: "z", preferences: new UserPreferences(language: 'en', activity: 'WebDesigner', colorScheme: 'dark', menu: ["taskBoard": "1", "planning": "2", "backlog": "3", "feature": "4", "project": "5"])))
+            }
+        }
 
         if(grailsApplication.config.icescrum.createDefaultAdmin && !grailsApplication.config.icescrum.setupCompleted){
             println "Creating default admin..."
@@ -40,7 +54,8 @@ class BootStrap {
             grailsApplication.config.icescrum.setupCompleted = true
         }
 
-        servletContext.addListener(timeoutHttpSessionListener)
+        // Grails 7: timeoutHttpSessionListener is a bean implementing HttpSessionListener,
+        // Spring Boot registers it in the embedded container automatically
         localeResolver.defaultLocale = Locale.ENGLISH
         java.util.Locale.setDefault(Locale.ENGLISH)
         TimeZone.setDefault(TimeZone.getTimeZone(grailsApplication.config.icescrum.timezone.default))

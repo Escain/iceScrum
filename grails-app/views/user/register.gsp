@@ -34,7 +34,7 @@
                     <div class="rect_2"></div>
                     <div class="rect_3"></div>
                 </div>
-                <div class="register" ng-controller="registerCtrl" ng-init="token = '${token ?: ''}';redirectTo='${params.redirectTo ?: ''}'">
+                <div class="register" ng-controller="registerCtrl" ng-init="token = '${(token ?: '').encodeAsJavaScript()}';redirectTo='${(params.redirectTo ?: '').encodeAsJavaScript()}'">
                     <div class="text-center">
                         <a href="https://www.icescrum.com" target="_blank">
                             <img id="logo" alt="iceScrum" src="${assetPath(src: 'application/logo.png')}">

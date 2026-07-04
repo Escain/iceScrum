@@ -24,9 +24,10 @@
 
 package org.icescrum.presentation.taglib
 
+import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.util.Holders
-import org.codehaus.groovy.grails.orm.hibernate.cfg.GrailsHibernateUtil
+import org.grails.orm.hibernate.cfg.GrailsHibernateUtil
 import org.icescrum.core.domain.security.Authority
 import org.icescrum.core.support.ApplicationSupport
 import org.icescrum.core.ui.WindowDefinition
@@ -37,7 +38,7 @@ class UtilsTagLib {
 
     static namespace = 'is'
 
-    def grailsApplication
+    GrailsApplication grailsApplication
     def uiDefinitionService
 
     def header = { attrs, body ->

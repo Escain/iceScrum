@@ -24,8 +24,8 @@
 
 package org.icescrum.i18n
 
-import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
-import org.codehaus.groovy.grails.context.support.ReloadableResourceBundleMessageSource.PropertiesHolder
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
+import org.grails.spring.context.support.ReloadableResourceBundleMessageSource.PropertiesHolder
 
 class IceScrumMessageSource extends PluginAwareResourceBundleMessageSource {
     public Map<String, String> getAllMessages(Locale locale) {

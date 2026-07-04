@@ -53,7 +53,7 @@
           flow-prevent-drop=""
           fullscreen="application.isFullScreen"
           ng-class="{'application-ready':application != null, 'loading': (application.loading || application.loadingText), 'splash-screen': (application.loadingPercent != 100 || application.loadingText)}"
-          class="splash-screen loading ${workspace?.name ? 'workspace-' + workspace.name : ''} ${bodyClasses ?: ''}">
+          class="splash-screen loading ${workspace?.name ? 'workspace-' + workspace.name.encodeAsHTML() : ''} ${bodyClasses ?: ''}">
         <g:include view="layouts/_splashScreen.gsp"/>
         <is:header/>
         <div class="is-container-fluid main" ui-view>
@@ -66,7 +66,7 @@
         <g:if test="${Environment.currentEnvironment == Environment.DEVELOPMENT && Holders.grailsApplication.config.icescrum.profiling.enable && params.profiler}">
             <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" type="text/css">
             <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-            <hibernateMetrics:metrics/>
+            %{-- Grails 7 migration: the hibernateMetrics plugin was not ported; tag removed so it can't emit a literal unclosed element. --}%
         </g:if>
     </body>
 </html>

@@ -20,18 +20,26 @@
  * Vincent Barrier (vbarrier@kagilum.com)
  */
 
-import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.CompositeResourceAccessor
-import liquibase.resource.FileSystemResourceAccessor
 import org.icescrum.core.security.MethodScrumExpressionHandler
 import org.icescrum.core.security.WebScrumExpressionHandler
 import org.icescrum.core.utils.TimeoutHttpSessionListener
 import org.icescrum.i18n.IceScrumMessageSource
 
+// Grails 7 migration notes:
+// - task:annotation-driven XML namespace replaced by @EnableAsync/@EnableScheduling
+//   on the Application class
+// - the dev-mode liquibase migrationResourceAccessor bean was dropped: the
+//   database-migration plugin resolves grails-app/migrations itself now
 beans = {
 
-    xmlns task: "http://www.springframework.org/schema/task"
-    task.'annotation-driven'()
+    // Was registered by the Grails 2 spring-security-core plugin
+    parameterNameDiscoverer(org.springframework.core.DefaultParameterNameDiscoverer)
+
+    primaryBeanConfigurer(org.icescrum.web.support.PrimaryBeanConfigurer) {
+        primaryBeanNames = ['grailsCacheManager']
+    }
+
+    layoutViewResolverInitializer(org.icescrum.web.support.LayoutViewResolverInitializer)
 
     webExpressionHandler(WebScrumExpressionHandler) {
         roleHierarchy = ref('roleHierarchy')
@@ -45,22 +53,13 @@ beans = {
     }
 
     messageSource(IceScrumMessageSource) {
-        basenames = "WEB-INF/grails-app/i18n/messages"
+        basenames = "classpath:messages"
+        // wired automatically for the default messageSource, not for a custom bean
+        pluginManager = ref('pluginManager')
     }
 
     timeoutHttpSessionListener(TimeoutHttpSessionListener) {
         config = grailsApplication.config
     }
 
-    // Manage plugins migrations
-    if (!application.warDeployed) {
-        String changelogLocationPath = new File('grails-app/migrations').path
-        def openers = [new FileSystemResourceAccessor(changelogLocationPath), new ClassLoaderResourceAccessor()]
-        System.getProperty("icescrum.plugins.dir")?.split(";")?.each {
-            if (new File(it + "/grails-app/migrations").exists()) {
-                openers << new FileSystemResourceAccessor(it + "/grails-app/migrations")
-            }
-        }
-        migrationResourceAccessor(CompositeResourceAccessor, openers)
-    }
 }

@@ -30,7 +30,7 @@ import org.icescrum.core.error.ControllerErrorHandler
 import org.icescrum.core.security.WorkspaceSecurity
 import org.icescrum.plugins.attachmentable.domain.Attachment
 
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletResponse
 
 @Secured('permitAll()')
 class AttachmentController implements ControllerErrorHandler, WorkspaceSecurity {
@@ -70,8 +70,12 @@ class AttachmentController implements ControllerErrorHandler, WorkspaceSecurity 
         } else {
             File file = attachmentableService.getFile(attachment)
             if (file.exists()) {
-                String filename = attachment.filename
-                ['Content-disposition': "attachment;filename=\"$filename\"", 'Cache-Control': 'private', 'Pragma': ''].each { k, v ->
+                // Security: the filename is user-controlled; strip CR/LF and quotes so it can't inject headers or
+                // break out of the quoted value, and add an RFC 5987 filename* for correct Unicode handling.
+                String rawName = attachment.filename ?: 'download'
+                String safeName = rawName.replaceAll(/[\r\n"\\]/, '_')
+                String encodedName = URLEncoder.encode(rawName, 'UTF-8').replace('+', '%20')
+                ['Content-disposition': "attachment; filename=\"$safeName\"; filename*=UTF-8''$encodedName", 'Cache-Control': 'private', 'Pragma': ''].each { k, v ->
                     response.setHeader(k, v)
                 }
                 response.contentType = attachment.contentType

@@ -21,3 +21,7 @@ logs/
 .DS_Store
 ehthumbs.db
 Thumbs.db
+# Gradle (Grails 7 migration)
+.gradle/
+build/
+target/

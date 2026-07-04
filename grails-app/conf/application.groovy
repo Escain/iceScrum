@@ -26,13 +26,11 @@
 import grails.plugin.springsecurity.SecurityFilterPosition
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.userdetails.GrailsUser
-import org.codehaus.groovy.grails.plugins.web.taglib.JavascriptTagLib
 import org.icescrum.core.domain.*
 import org.icescrum.core.domain.security.Authority
 import org.icescrum.core.security.rest.TokenExtractor
 import org.icescrum.core.services.SecurityService
 import org.icescrum.core.support.ApplicationSupport
-import org.icescrum.web.JQueryProvider
 
 import javax.naming.InitialContext
 
@@ -77,7 +75,7 @@ icescrum {
             baseDir = extConfFile
         }
     } catch (Exception e) {
-        baseDir = new File(System.getProperty('user.home'), appName).canonicalPath
+        baseDir = new File(System.getProperty('user.home'), 'icescrum').canonicalPath
     }
 
     auto_follow_productowner = true
@@ -406,7 +404,6 @@ grails.plugin.databasemigration.updateOnStart = true
 grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
 
 /* Default grails config */
-grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.disable.accept.header.userAgents = ['Gecko', 'WebKit', 'Presto', 'Trident'] // experiment
 grails.mime.types = [
@@ -425,7 +422,15 @@ grails.mime.types = [
 ]
 
 // The default codec used to encode data with ${}
-grails.views.default.codec = "none" // none, html, base64
+grails.views.default.codec = "none" // none, html, base64 (legacy key, ignored by Grails 7)
+// Grails 7 replaced the key above with per-part codecs and defaults expressions
+// to HTML-encoding. iceScrum templates (e.g. is:widget passing body() through a
+// model expression) rely on the original unencoded behavior and do their own
+// escaping where needed.
+grails.views.gsp.codecs.expression = 'none'
+grails.views.gsp.codecs.scriptlet = 'none'
+grails.views.gsp.codecs.taglib = 'none'
+grails.views.gsp.codecs.staticparts = 'none'
 grails.views.gsp.encoding = "UTF-8"
 grails.converters.encoding = "UTF-8"
 
@@ -471,12 +476,8 @@ environments {
 
 println "\n| Tmp directory: ${System.getProperty("java.io.tmpdir")}"
 
-grails.cache.config = {
-    cache {
-        name 'feed'
-        timeToLiveSeconds 120
-    }
-}
+// Grails 7 cache plugin has no config DSL; the 'feed' cache (ttl 120s) must be
+// defined in ehcache.xml if fine-grained tuning is needed.
 
 /*log4j = {
     def config = Holders.config
@@ -598,20 +599,19 @@ grails {
 
             rejectIfNoRule = false
             fii.rejectPublicInvocations = true
+            // Grails 7 / spring-security-core 4+: staticRules must be a List of Maps (same rules and order as the old Map form)
             controllerAnnotations.staticRules = [
                     //app controllers rules
-                    '/grails-errorhandler'     : ['permitAll'],
-                    '/stream/app/**'           : ['permitAll'],
-                    '/scrumOS/**'              : ['permitAll'],
-                    '/user/**'                 : ['permitAll'],
-                    '/errors/**'               : ['permitAll'],
-                    '/assets/**'               : ['permitAll'],
-                    '/**/js/**'                : ['permitAll'],
-                    '/**/css/**'               : ['permitAll'],
-                    '/**/images/**'            : ['permitAll'],
-                    '/**/favicon.ico'          : ['permitAll'],
-                    '/oauth/authorize.dispatch': ["isFullyAuthenticated() and (request.getMethod().equals('GET') or request.getMethod().equals('POST'))"],
-                    '/oauth/token.dispatch'    : ["isFullyAuthenticated() and request.getMethod().equals('POST')"]
+                    [pattern: '/grails-errorhandler', access: ['permitAll']],
+                    [pattern: '/stream/app/**', access: ['permitAll']],
+                    [pattern: '/scrumOS/**', access: ['permitAll']],
+                    [pattern: '/user/**', access: ['permitAll']],
+                    [pattern: '/errors/**', access: ['permitAll']],
+                    [pattern: '/assets/**', access: ['permitAll']],
+                    [pattern: '/**/js/**', access: ['permitAll']],
+                    [pattern: '/**/css/**', access: ['permitAll']],
+                    [pattern: '/**/images/**', access: ['permitAll']],
+                    [pattern: '/**/favicon.ico', access: ['permitAll']],
             ]
 
             userLookup.userDomainClassName = 'org.icescrum.core.domain.User'
@@ -621,21 +621,29 @@ grails {
             successHandler.targetUrlParameter = 'redirectTo'
             logout.targetUrlParameter = 'redirectTo'
             useBasicAuth = true
+            // Spring Security 6 renamed the form-login endpoint and parameters;
+            // keep the legacy names used by the login GSP
+            apf.filterProcessesUrl = '/j_spring_security_check'
+            apf.usernameParameter = 'j_username'
+            apf.passwordParameter = 'j_password'
             basic.realmName = "Basic authentication for iceScrum"
+            // Grails 7 plugin requires a List of Maps (same patterns/filters/order as the old Map form)
             filterChain.chainMap = [
-                    '/ws/**'          : 'JOINED_FILTERS,-exceptionTranslationFilter,-authenticationProcessingFilter,-securityContextPersistenceFilter,-securityContextHolderAwareRequestFilter,-anonymousAuthenticationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter', // Only token auth & oauth
-                    '/**/project/feed': 'JOINED_FILTERS,-exceptionTranslationFilter,-tokenAuthenticationFilter,-restExceptionTranslationFilter,-statelessSecurityContextPersistenceFilter,-oauth2ProviderFilter,-clientCredentialsTokenEndpointFilter,-oauth2BasicAuthenticationFilter,-oauth2ExceptionTranslationFilter', // Session & basic auth
-                    '/oauth/token'    : 'JOINED_FILTERS,-oauth2ProviderFilter,-securityContextPersistenceFilter,-logoutFilter,-authenticationProcessingFilter,-rememberMeAuthenticationFilter,-exceptionTranslationFilter',
-                    '/**'             : 'JOINED_FILTERS,-tokenAuthenticationFilter,-restExceptionTranslationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter,-statelessSecurityContextPersistenceFilter,-oauth2ProviderFilter,-clientCredentialsTokenEndpointFilter,-oauth2BasicAuthenticationFilter,-oauth2ExceptionTranslationFilter'// Only form auth with session
+                    [pattern: '/ws/**', filters: 'JOINED_FILTERS,-exceptionTranslationFilter,-authenticationProcessingFilter,-securityContextPersistenceFilter,-securityContextHolderAwareRequestFilter,-anonymousAuthenticationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter'], // Only token auth
+                    [pattern: '/**/project/feed', filters: 'JOINED_FILTERS,-exceptionTranslationFilter,-tokenAuthenticationFilter,-restExceptionTranslationFilter'], // Session & basic auth
+                    [pattern: '/**', filters: 'JOINED_FILTERS,-tokenAuthenticationFilter,-restExceptionTranslationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter'] // Only form auth with session
             ]
 
+            // Security: signing keys must NOT be hardcoded/shared across installs. Set stable per-install
+            // secrets via env (ICESCRUM_REMEMBERME_KEY / ICESCRUM_RUNAS_KEY) or external config; otherwise a
+            // fresh random key is generated each start (remember-me cookies then don't survive a restart).
             rememberMe {
                 cookieName = 'iceScrum'
-                key = 'VincNicoJuShazam$'
+                key = System.getenv('ICESCRUM_REMEMBERME_KEY') ?: ApplicationSupport.randomSecret()
             }
 
             useRunAs = true
-            runAs.key = 'VincNicoJuShazam!'
+            runAs.key = System.getenv('ICESCRUM_RUNAS_KEY') ?: ApplicationSupport.randomSecret()
             acl.authority.changeAclDetails = 'ROLE_RUN_AS_PERMISSIONS_MANAGER'
 
             useSecurityEventListener = true
@@ -650,17 +658,6 @@ grails {
                 }
             }
 
-            oauthProvider {
-                exceptionTranslationFilterStartPosition = SecurityFilterPosition.EXCEPTION_TRANSLATION_FILTER.order + 2
-                oauthProvider.clientLookup.className = 'org.icescrum.core.domain.security.Client'
-                authorizationCodeLookup.className = 'org.icescrum.core.domain.security.AuthorizationCode'
-                accessTokenLookup.className = 'org.icescrum.core.domain.security.AccessToken'
-                refreshTokenLookup.className = 'org.icescrum.core.domain.security.RefreshToken'
-                tokenServices {
-                    accessTokenValiditySeconds = 60 * 60 * 12 // default 12 hours
-                    refreshTokenValiditySeconds = 60 * 60 * 24 * 30 // default 30 days
-                }
-            }
         }
     }
 }
@@ -670,7 +667,7 @@ environments {
     production {
         def systemConfig = System.getProperty(ApplicationSupport.CONFIG_ENV_NAME)
         def envConfig = System.getenv(ApplicationSupport.CONFIG_ENV_NAME)
-        def homeConfig = "${userHome}${File.separator}.icescrum${File.separator}config.groovy"
+        def homeConfig = "${System.getProperty('user.home')}${File.separator}.icescrum${File.separator}config.groovy"
         println "--------------------------------------------------------"
         if (systemConfig && new File(systemConfig).exists()) {  // 1. System variable passed to the JVM : -Dicescrum.config.file=.../config.groovy
             println "Use configuration file provided a JVM system variable: " + systemConfig
@@ -701,7 +698,7 @@ environments {
         grails.mail.overrideAddress = "testing@kagilum.com"
         def systemConfig = System.getProperty(ApplicationSupport.CONFIG_ENV_NAME)
         def envConfig = System.getenv(ApplicationSupport.CONFIG_ENV_NAME)
-        def homeConfig = "${userHome}${File.separator}.icescrum${File.separator}config.groovy"
+        def homeConfig = "${System.getProperty('user.home')}${File.separator}.icescrum${File.separator}config.groovy"
         println "--------------------------------------------------------"
         if (systemConfig && new File(systemConfig).exists()) {  // 1. System variable passed to the JVM : -Dicescrum.config.file=.../config.groovy
             println "Use configuration file provided a JVM system variable: " + systemConfig
@@ -732,34 +729,17 @@ environments {
         grails.mail.overrideAddress = "testing@kagilum.com"
         grails.plugins.hibernateMetrics.enabled = true
         grails.plugins.hibernateMetrics.logSqlToConsole = false
-        grails.plugin.springsecurity.controllerAnnotations.staticRules['/hibernateMetrics/**'] = ['permitAll']
+        grails.plugin.springsecurity.controllerAnnotations.staticRules << [pattern: '/hibernateMetrics/**', access: ['permitAll']] // List-of-Maps format (spring-security-core 4+)
     }
 }
 
-JavascriptTagLib.LIBRARY_MAPPINGS.jquery = ["jquery/jquery-${jQueryVersion}.min"]
-JavascriptTagLib.PROVIDER_MAPPINGS.jquery = JQueryProvider.class
+// Grails 7: the g:javascript library provider mechanism (JavascriptTagLib
+// LIBRARY_MAPPINGS / JQueryProvider) no longer exists; jQuery is loaded via the
+// asset pipeline.
 
-def uniqueCacheManagerName = appName + "-EhCacheManager-" + System.currentTimeMillis()
 grails {
     cache {
-        order = 2000 // higher than default (1000) and plugins, usually 1500
         enabled = true
-        clearAtStartup = true // reset caches when redeploying
-        ehcache {
-            cacheManagerName = uniqueCacheManagerName
-        }
-        config = {
-            provider {
-                name uniqueCacheManagerName // unique name when configuring caches
-            }
-            sizeOfPolicy {
-                maxDepth 100
-                maxDepthExceededBehavior 'abort'
-            }
-            defaultCache {
-                maxElementsInMemory 10000
-            }
-        }
     }
     // To improve perf
     gorm.default.mapping = {
@@ -778,5 +758,67 @@ grails {
 beans {
     cacheManager {
         shared = true
+    }
+}
+
+/* DataSource (migrated from grails-app/conf/DataSource.groovy) */
+hibernate {
+    jdbc.batch_size = 50
+    jdbc.lob.non_contextual_creation = true // PostgreSQL: avoid "PgConnection.createClob() not yet implemented" on text/lob columns
+    order_inserts = true
+    order_updates = true
+    batch_versioned_data = true
+    // Second-level/query cache disabled during the Grails 7 migration; the old
+    // BeanEhcacheRegionFactory4 (cache-ehcache 1.x) no longer exists. Re-enable
+    // with a Hibernate 5.6-compatible region factory once the app is stable.
+    cache.use_second_level_cache = false
+    cache.use_query_cache = false
+}
+
+environments {
+    development {
+        // Default: in-memory H2 (zero setup, wiped each run). To run dev against PostgreSQL for parity with
+        // production, set ICESCRUM_DB_URL (+ optional ICESCRUM_DB_USERNAME/PASSWORD/DBCREATE), e.g.:
+        //   ICESCRUM_DB_URL=jdbc:postgresql://localhost:5432/icescrum ./gradlew bootRun
+        dataSource {
+            if (System.getenv("ICESCRUM_DB_URL")) {
+                dbCreate = System.getenv("ICESCRUM_DB_DBCREATE") ?: "update"
+                driverClassName = "org.postgresql.Driver"
+                url = System.getenv("ICESCRUM_DB_URL")
+                username = System.getenv("ICESCRUM_DB_USERNAME") ?: "icescrum"
+                password = System.getenv("ICESCRUM_DB_PASSWORD") ?: "icescrum"
+            } else {
+                dbCreate = "create-drop"
+                username = "sa"
+                password = ""
+                driverClassName = "org.h2.Driver"
+                url = "jdbc:h2:mem:devDb"
+            }
+        }
+    }
+    test {
+        dataSource {
+            dbCreate = "update"
+            url = "jdbc:h2:testDb"
+            driverClassName = "org.h2.Driver"
+            username = "sa"
+            password = ""
+        }
+    }
+    production {
+        // PostgreSQL 17 by default. Override any field via env vars (ICESCRUM_DB_*) or an external config
+        // file (~/.icescrum/config.groovy, or the path in the ICESCRUM_CONFIG env var). GORM (dbCreate) builds
+        // the schema from the domain classes and the Liquibase changelogs (grails-app/migrations) patch it on
+        // start (grails.plugin.databasemigration.updateOnStart). The PostgreSQL JDBC driver is on the runtime
+        // classpath (build.gradle) and Hibernate 5.6 auto-selects the PostgreSQL dialect.
+        dataSource {
+            pooled = true
+            dbCreate = System.getenv("ICESCRUM_DB_DBCREATE") ?: "update"
+            driverClassName = "org.postgresql.Driver"
+            url = System.getenv("ICESCRUM_DB_URL") ?: "jdbc:postgresql://localhost:5432/icescrum"
+            username = System.getenv("ICESCRUM_DB_USERNAME") ?: "icescrum"
+            password = System.getenv("ICESCRUM_DB_PASSWORD") ?: "icescrum"
+            // Connection pool is HikariCP (Spring Boot default); the old tomcat-jdbc pool properties were dropped.
+        }
     }
 }

@@ -24,8 +24,8 @@
 
 package org.icescrum.web.presentation.windows
 
-import com.sun.syndication.io.SyndFeedOutput
-import feedsplugin.FeedBuilder
+import com.rometools.rome.io.SyndFeedOutput
+import org.icescrum.web.support.FeedBuilder
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
