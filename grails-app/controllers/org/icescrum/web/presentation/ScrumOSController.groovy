@@ -98,12 +98,16 @@ class ScrumOSController implements ControllerErrorHandler, CacheHeadersSupport {
     }
 
     def about() {
-        def aboutFile = new File(grailsAttributes.getApplicationContext().getResource("/infos").getFile().toString() + File.separatorChar + "about.xml")
+        // Read the resource as a stream, not a File: getResource(...).getFile() throws in a packaged WAR because
+        // /infos/about.xml lives inside the archive and has no filesystem path (worked in dev/exploded only).
+        def aboutXml = grailsAttributes.getApplicationContext().getResource("/infos/about.xml").inputStream.withStream { stream ->
+            org.icescrum.core.utils.ServicesUtils.secureXmlSlurper().parse(stream)
+        }
         render(status: 200, template: "about/index", model: [server        : servletContext.getServerInfo(),
                                                              versionNumber : g.meta([name: 'app.version']),
                                                              maxMemory     : ApplicationSupport.getJavaMaxMemory(),
                                                              serverUrl     : ApplicationSupport.serverURL(),
-                                                             about         : org.icescrum.core.utils.ServicesUtils.secureXmlSlurper().parse(aboutFile),
+                                                             about         : aboutXml,
                                                              configLocation: grailsApplication.config.grails.config.locations instanceof List ? grailsApplication.config.grails.config.locations.join(', ') : ''])
     }
 

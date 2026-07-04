@@ -458,7 +458,7 @@ grails.exceptionresolver.params.exclude = ['password', 'user.password', 'user.co
 
 environments {
     development {
-        icescrum.serverURL = "http://localhost:8080/icescrum"
+        icescrum.serverURL = "http://localhost:8080"  // no /icescrum context path — Grails 7 boot serves at root
         icescrum.debug.enable = true
         grails.entryPoints.debug = false
         grails.tomcat.nio = true
