@@ -4,11 +4,11 @@
 ---
 app:
     name: icescrum
-    version: '7.55'
+    version: '7.56'
     displayReleaseNotes: 'true'
     displayWhatsNew: 'true'
 info:
     app:
         name: icescrum
-        version: '7.55'
+        version: '7.56'
         grailsVersion: '7.1.2'
