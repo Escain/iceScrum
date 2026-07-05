@@ -31,6 +31,12 @@ class ProjectKeyCodec {
     static final numeric = /[0-9]*/
 
     static decode = { theTarget ->
+        // A request param can arrive as a String[] (params get duplicated/arrayified when the error layout
+        // re-includes the URL, e.g. a logged-out hit on /p/KEY/); collapse to a single value so the criteria
+        // query binds a String, not an array (which throws ClassCastException in Hibernate's string binder).
+        if (theTarget instanceof Object[] || theTarget instanceof Collection) {
+            theTarget = theTarget ? theTarget[0] : null
+        }
         if (!theTarget || theTarget instanceof Project || theTarget instanceof Map || theTarget ==~ numeric) {
             return theTarget
         }
