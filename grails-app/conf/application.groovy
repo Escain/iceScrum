@@ -634,16 +634,16 @@ grails {
                     [pattern: '/**', filters: 'JOINED_FILTERS,-tokenAuthenticationFilter,-restExceptionTranslationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter'] // Only form auth with session
             ]
 
-            // Security: signing keys must NOT be hardcoded/shared across installs. Set stable per-install
-            // secrets via env (ICESCRUM_REMEMBERME_KEY / ICESCRUM_RUNAS_KEY) or external config; otherwise a
-            // fresh random key is generated each start (remember-me cookies then don't survive a restart).
+            // Security: signing keys must NOT be hardcoded/shared across installs. Per-install secrets come from
+            // an env var, else a key file under ~/.icescrum/ (generated once, then STABLE across restarts so a
+            // server bounce doesn't invalidate everyone's remember-me cookie and log them all out).
             rememberMe {
                 cookieName = 'iceScrum'
-                key = System.getenv('ICESCRUM_REMEMBERME_KEY') ?: ApplicationSupport.randomSecret()
+                key = ApplicationSupport.persistedSecret('ICESCRUM_REMEMBERME_KEY', 'remember-me.key')
             }
 
             useRunAs = true
-            runAs.key = System.getenv('ICESCRUM_RUNAS_KEY') ?: ApplicationSupport.randomSecret()
+            runAs.key = ApplicationSupport.persistedSecret('ICESCRUM_RUNAS_KEY', 'run-as.key')
             acl.authority.changeAclDetails = 'ROLE_RUN_AS_PERMISSIONS_MANAGER'
 
             useSecurityEventListener = true
