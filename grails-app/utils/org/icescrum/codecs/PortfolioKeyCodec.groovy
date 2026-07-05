@@ -31,6 +31,11 @@ class PortfolioKeyCodec {
     static final numeric = /[0-9]*/
 
     static decode = { theTarget ->
+        // A request param can arrive as a String[] (params get duplicated/arrayified when the error layout
+        // re-includes the URL); collapse to a single value so the criteria query binds a String, not an array.
+        if (theTarget instanceof Object[] || theTarget instanceof Collection) {
+            theTarget = theTarget ? theTarget[0] : null
+        }
         if (!theTarget || theTarget instanceof Portfolio || theTarget instanceof Map || theTarget ==~ numeric) {
             return theTarget
         }
