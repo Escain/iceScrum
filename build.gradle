@@ -60,6 +60,15 @@ dependencies {
     implementation "org.apache.grails:grails-web-boot"
     // cache-ehcache 3.0.0 is not resolvable from Maven Central; the default
     // grails-cache cache manager is used instead (ehcache tuning TBD)
+    // Hibernate second-level/query cache (restores the pre-migration caching) through
+    // JSR-107 backed by the Ehcache 3 already on the classpath. hibernate-ehcache is a
+    // dead end here (its pregenerated message logger is rejected by jboss-logging 3.6),
+    // and neither cache module has a -jakarta variant: hibernate-jcache only touches the
+    // cache SPI (identical in hibernate-core-jakarta), so exclude the javax hibernate-core
+    // it would otherwise drag in.
+    implementation("org.hibernate:hibernate-jcache:5.6.15.Final") {
+        exclude group: "org.hibernate", module: "hibernate-core"
+    }
     implementation "org.springframework.boot:spring-boot-autoconfigure"
     implementation "org.springframework.boot:spring-boot-starter"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
