@@ -768,11 +768,16 @@ hibernate {
     order_inserts = true
     order_updates = true
     batch_versioned_data = true
-    // Second-level/query cache disabled during the Grails 7 migration; the old
-    // BeanEhcacheRegionFactory4 (cache-ehcache 1.x) no longer exists. Re-enable
-    // with a Hibernate 5.6-compatible region factory once the app is stable.
-    cache.use_second_level_cache = false
-    cache.use_query_cache = false
+    // Second-level/query cache re-enabled (2026-07): same semantics as the old
+    // BeanEhcacheRegionFactory4 setup, now via hibernate-jcache backed by Ehcache 3.
+    // Domain classes opt in via 'cache true' in their mapping blocks; regions are
+    // created on demand (missing_cache_strategy). For fine-grained tuning provide an
+    // ehcache 3 XML and point hibernate.javax.cache.uri at it.
+    cache.use_second_level_cache = true
+    cache.use_query_cache = true
+    cache.region.factory_class = 'jcache'
+    javax.cache.provider = 'org.ehcache.jsr107.EhcacheCachingProvider'
+    javax.cache.missing_cache_strategy = 'create'
 }
 
 environments {
