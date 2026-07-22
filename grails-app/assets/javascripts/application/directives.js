@@ -385,6 +385,7 @@ directives.directive('isMarkitup', ['$http', '$rootScope', function($http, $root
         templateUrl: 'is.progress.html',
         link: function(scope, element, attrs) {
             var status;
+            var notFoundRetries;
             scope.progress = {
                 value: -1,
                 label: "",
@@ -393,6 +394,7 @@ directives.directive('isMarkitup', ['$http', '$rootScope', function($http, $root
             scope.$watch('start', function(value) {
                 stopProgress();
                 if (value === true) {
+                    notFoundRetries = 20;
                     $timeout(progress, 500);
                 }
             });
@@ -411,7 +413,15 @@ directives.directive('isMarkitup', ['$http', '$rootScope', function($http, $root
                     } else if (data.complete) {
                         scope.progress.type = 'success';
                     }
-                }, function() {
+                }, function(response) {
+                    // 404 means no progress registered (yet): the download request may still be
+                    // collecting the report data before it reaches renderReport, and the first
+                    // poll often wins that race. Keep polling instead of flashing a false error;
+                    // real report failures arrive as a 200 with error:true.
+                    if (response.status == 404 && notFoundRetries-- > 0) {
+                        status = $timeout(progress, 500);
+                        return;
+                    }
                     scope.progress.type = 'danger';
                     scope.progress.label = $rootScope.message(attrs.errorMessage ? attrs.errorMessage : 'todo.is.ui.error');
                     scope.progress.value = 100;

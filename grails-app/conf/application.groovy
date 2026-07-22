@@ -458,7 +458,7 @@ grails.exceptionresolver.params.exclude = ['password', 'user.password', 'user.co
 
 environments {
     development {
-        icescrum.serverURL = "http://localhost:8080/icescrum"
+        icescrum.serverURL = "http://localhost:8080"  // no /icescrum context path — Grails 7 boot serves at root
         icescrum.debug.enable = true
         grails.entryPoints.debug = false
         grails.tomcat.nio = true
@@ -634,16 +634,16 @@ grails {
                     [pattern: '/**', filters: 'JOINED_FILTERS,-tokenAuthenticationFilter,-restExceptionTranslationFilter,-basicAuthenticationFilter,-basicExceptionTranslationFilter'] // Only form auth with session
             ]
 
-            // Security: signing keys must NOT be hardcoded/shared across installs. Set stable per-install
-            // secrets via env (ICESCRUM_REMEMBERME_KEY / ICESCRUM_RUNAS_KEY) or external config; otherwise a
-            // fresh random key is generated each start (remember-me cookies then don't survive a restart).
+            // Security: signing keys must NOT be hardcoded/shared across installs. Per-install secrets come from
+            // an env var, else a key file under ~/.icescrum/ (generated once, then STABLE across restarts so a
+            // server bounce doesn't invalidate everyone's remember-me cookie and log them all out).
             rememberMe {
                 cookieName = 'iceScrum'
-                key = System.getenv('ICESCRUM_REMEMBERME_KEY') ?: ApplicationSupport.randomSecret()
+                key = ApplicationSupport.persistedSecret('ICESCRUM_REMEMBERME_KEY', 'remember-me.key')
             }
 
             useRunAs = true
-            runAs.key = System.getenv('ICESCRUM_RUNAS_KEY') ?: ApplicationSupport.randomSecret()
+            runAs.key = ApplicationSupport.persistedSecret('ICESCRUM_RUNAS_KEY', 'run-as.key')
             acl.authority.changeAclDetails = 'ROLE_RUN_AS_PERMISSIONS_MANAGER'
 
             useSecurityEventListener = true
@@ -768,11 +768,16 @@ hibernate {
     order_inserts = true
     order_updates = true
     batch_versioned_data = true
-    // Second-level/query cache disabled during the Grails 7 migration; the old
-    // BeanEhcacheRegionFactory4 (cache-ehcache 1.x) no longer exists. Re-enable
-    // with a Hibernate 5.6-compatible region factory once the app is stable.
-    cache.use_second_level_cache = false
-    cache.use_query_cache = false
+    // Second-level/query cache re-enabled (2026-07): same semantics as the old
+    // BeanEhcacheRegionFactory4 setup, now via hibernate-jcache backed by Ehcache 3.
+    // Domain classes opt in via 'cache true' in their mapping blocks; regions are
+    // created on demand (missing_cache_strategy). For fine-grained tuning provide an
+    // ehcache 3 XML and point hibernate.javax.cache.uri at it.
+    cache.use_second_level_cache = true
+    cache.use_query_cache = true
+    cache.region.factory_class = 'jcache'
+    javax.cache.provider = 'org.ehcache.jsr107.EhcacheCachingProvider'
+    javax.cache.missing_cache_strategy = 'create'
 }
 
 environments {
