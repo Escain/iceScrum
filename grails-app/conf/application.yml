@@ -4,11 +4,21 @@
 ---
 app:
     name: icescrum
-    version: '7.56'
+    version: '7.57'
     displayReleaseNotes: 'true'
     displayWhatsNew: 'true'
 info:
     app:
         name: icescrum
-        version: '7.56'
+        version: '7.57'
         grailsVersion: '7.1.2'
+grails:
+    controllers:
+        upload:
+            # Grails 7 ControllersAutoConfiguration builds the servlet MultipartConfigElement
+            # from these keys, with a 128000-byte (125KB) default that broke every attachment
+            # upload larger than that (MaxUploadSizeExceededException). Grails 2 had no such
+            # limit. Keep in sync with the reverse proxy's request body limit
+            # (client_max_body_size 100m on the production nginx).
+            maxFileSize: 104857600
+            maxRequestSize: 104857600
