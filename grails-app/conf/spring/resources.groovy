@@ -53,7 +53,8 @@ beans = {
     }
 
     messageSource(IceScrumMessageSource) {
-        basenames = "classpath:messages"
+        // basenames are owned by IceScrumMessageSource.afterPropertiesSet() — setting
+        // them here would be discarded by the parent's classpath scan anyway
         // wired automatically for the default messageSource, not for a custom bean
         pluginManager = ref('pluginManager')
     }

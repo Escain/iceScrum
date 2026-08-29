@@ -28,7 +28,22 @@ import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.grails.spring.context.support.ReloadableResourceBundleMessageSource.PropertiesHolder
 
 class IceScrumMessageSource extends PluginAwareResourceBundleMessageSource {
-    public Map<String, String> getAllMessages(Locale locale) {
+
+    // Grails 7: the parent afterPropertiesSet() recomputes basenames by scanning
+    // classpath *.properties resources and deriving basenames from their filenames,
+    // discarding whatever was configured on the bean. In a packaged fat WAR the scan
+    // happens to yield [messages, report], but when the WAR runs exploded (unzipped
+    // dir + WarLauncher, as deployed for classloading performance) it only yields
+    // [report], so every app message rendered as its raw key (is.ui.*, is.login...).
+    // Re-assert the intended basenames after the parent scan so both layouts behave
+    // identically. This class owns the basenames; the bean definition must not set them.
+    @Override
+    void afterPropertiesSet() throws Exception {
+        super.afterPropertiesSet()
+        setBasenames('messages', 'report')
+    }
+
+    Map<String, String> getAllMessages(Locale locale) {
         def propertiesHolders = ([] << getMergedProperties(locale)) << getMergedPluginProperties(locale)
         def messages = [:]
         propertiesHolders.each { PropertiesHolder holder ->
