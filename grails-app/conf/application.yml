@@ -4,14 +4,19 @@
 ---
 app:
     name: icescrum
-    version: '7.57'
+    version: '7.58'
     displayReleaseNotes: 'true'
     displayWhatsNew: 'true'
 info:
     app:
         name: icescrum
-        version: '7.57'
+        version: '7.58'
         grailsVersion: '7.1.2'
+# Behind the nginx reverse proxy: trust X-Forwarded-Proto/Port/Host from local proxies so that
+# Spring Security builds https://<public host>/login/authAjax for expired-session XHRs instead of
+# http://localhost:8080/..., which IceScrumRedirectStrategy rejected and replaced by the home page.
+server:
+    forward-headers-strategy: native
 grails:
     controllers:
         upload:

@@ -1,4 +1,4 @@
-iceScrum 7.57 — Apache Grails 7 fork
+iceScrum 7.58 — Apache Grails 7 fork
 ====================================
 
 Fork of iceScrum 7.55 (Kagilum, AGPL — see license.txt) ported from Grails
@@ -16,7 +16,7 @@ Building
 
     JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew bootWar -x test
 
-Produces build/libs/icescrum-7.57.war.
+Produces build/libs/icescrum-7.58.war.
 
 JAVA_HOME must point at a JDK 17 *JDK*: the build declares a Java 17 toolchain,
 and a JRE (or a JDK 21 without the matching toolchain) fails with "does not
@@ -53,7 +53,7 @@ lookups entirely — the same first request drops to 0.2–0.7 s (warm requests 
 copy of the ~165 MB archive.
 
     cd /home/icescrum/icescrum
-    sudo -u icescrum unzip -q icescrum-7.57.war -d app-new
+    sudo -u icescrum unzip -q icescrum-7.58.war -d app-new
     rm -rf app-old
     mv app app-old && mv app-new app     # instant swap; app-old is the rollback
     systemctl restart icescrum
